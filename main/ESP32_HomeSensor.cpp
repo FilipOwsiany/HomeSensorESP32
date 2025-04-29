@@ -1,0 +1,146 @@
+// ========== IDF ==========
+#include "nvs_flash.h"
+#include "esp_netif.h"
+#include "esp_event.h"
+#include "esp_task_wdt.h"
+#include "esp_system.h"
+#include "driver/i2c.h"
+#include "esp_system.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "nvs_flash.h"
+
+#include "lwip/err.h"
+#include "lwip/sys.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_freertos_hooks.h"
+#include "freertos/semphr.h"
+#include "esp_system.h"
+#include "driver/gpio.h"
+#include "esp_timer.h"
+#include "esp_random.h"
+
+#include "lvgl.h"
+#include "lv_examples.h"
+#include "lvgl_helpers.h"
+
+#define LV_TICK_PERIOD_MS   1
+#define DRAW_BUF_SIZE       (240 * 240 / 10 * (LV_COLOR_DEPTH / 8))
+
+static void lv_tick_task(void *arg);
+
+uint32_t draw_buf[DRAW_BUF_SIZE / 4];
+SemaphoreHandle_t xGuiSemaphore;
+
+static void guiTask(void *pvParameter) {
+
+    (void) pvParameter;
+    xGuiSemaphore = xSemaphoreCreateMutex();
+
+    lv_init();
+
+    lvgl_driver_init();
+
+    lv_display_t * disp;
+    disp = lv_display_create(240, 240);
+    lv_display_set_flush_cb(disp, disp_driver_flush);
+    lv_display_set_buffers(disp, draw_buf, NULL, sizeof(draw_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+#if defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_IL3820         \
+    || defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_JD79653A    \
+    || defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_UC8151D     \
+    || defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_SSD1306
+
+    /* Actual size in pixels, not bytes. */
+    size_in_px *= 8;
+#endif
+
+    printf("LV_HOR_RES_MAX %d\n", LV_HOR_RES_MAX);
+    printf("LV_VER_RES_MAX %d\n", LV_VER_RES_MAX);
+
+#ifdef CONFIG_LV_TFT_DISPLAY_MONOCHROME
+    disp_drv.rounder_cb = disp_driver_rounder;
+    disp_drv.set_px_cb = disp_driver_set_px;
+#endif
+
+#if CONFIG_LV_TOUCH_CONTROLLER != TOUCH_CONTROLLER_NONE
+    lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.read_cb = touch_driver_read;
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    lv_indev_drv_register(&indev_drv);
+#endif
+
+    const esp_timer_create_args_t periodic_timer_args = {
+        .callback = &lv_tick_task,
+        .arg = NULL,
+        .name = "periodic_gui"
+    };
+    esp_timer_handle_t periodic_timer;
+    ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
+
+    static lv_style_t style;
+    lv_style_init(&style);
+
+    lv_style_set_radius(&style, LV_RADIUS_CIRCLE);
+    lv_style_set_bg_opa(&style, LV_OPA_COVER);
+    lv_style_set_bg_color(&style, lv_palette_lighten(LV_PALETTE_GREY, 1));
+
+    lv_style_set_border_color(&style, lv_palette_main(LV_PALETTE_BLUE));
+    lv_style_set_border_width(&style, 5);
+    lv_style_set_border_opa(&style, LV_OPA_50);
+    lv_style_set_border_side(&style, LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT);
+
+    lv_obj_t* obj = lv_obj_create(lv_screen_active());
+    lv_obj_add_style(obj, &style, 0);
+    lv_obj_center(obj);
+    lv_obj_set_size(obj, 240, 240);
+    lv_obj_t * bar1 = lv_bar_create(lv_screen_active());
+    lv_obj_set_size(bar1, 200, 20);
+    lv_obj_center(bar1);
+    lv_bar_set_value(bar1, 70, LV_ANIM_OFF);
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+        if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY)) {
+            lv_task_handler();
+            xSemaphoreGive(xGuiSemaphore);
+       }
+    }
+
+    vTaskDelete(NULL);
+}
+
+static void lv_tick_task(void *arg) {
+    (void) arg;
+
+    lv_tick_inc(LV_TICK_PERIOD_MS);
+}
+
+extern "C" void app_main(void)
+{
+
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
+}
+
+
