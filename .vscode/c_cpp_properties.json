@@ -4,17 +4,9 @@
             "name": "release",
             "includePath": [
                 "${workspaceFolder}\\**",
-                "C:\\Espressif\\frameworks\\esp-idf-v5.0.4\\**"
+                "C:\\Espressif\\frameworks\\esp-idf-v5.1.4\\**"
             ],
             "compileCommands": "${workspaceFolder}\\build\\compile_commands.json"
-        },
-        {
-            "name": "TEST",
-            "includePath": [
-                "${workspaceFolder}\\**",
-                "C:\\Espressif\\frameworks\\esp-idf-v5.0.4\\**"
-            ],
-            "compileCommands": "${workspaceFolder}\\test\\build\\compile_commands.json"
         }
     ],
     "version": 4
