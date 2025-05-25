@@ -1,39 +1,16 @@
 // ========== IDF ==========
 #include "nvs_flash.h"
-#include "esp_netif.h"
-#include "esp_event.h"
-#include "esp_task_wdt.h"
-#include "esp_system.h"
-#include "driver/i2c.h"
-#include "esp_system.h"
-#include "esp_event.h"
-#include "esp_log.h"
-#include "nvs_flash.h"
-
-#include "lwip/err.h"
-#include "lwip/sys.h"
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_freertos_hooks.h"
-#include "freertos/semphr.h"
-#include "esp_system.h"
-#include "driver/gpio.h"
 #include "esp_timer.h"
-#include "esp_random.h"
+#include "driver/gpio.h"
+// ======== CUSTOM =========
+#include "commonStd.h"
+#include "commonOs.h"
+#include "commonLvgl.h"
+#include "CLogger.h"
 
-#include "lvgl.h"
-#include "lv_examples.h"
-#include "lvgl_helpers.h"
+#include "CControl.h"
+#include "CCommunication.h"
+#include "CHardware.h"
 
 #define LV_TICK_PERIOD_MS   1
 #define DRAW_BUF_SIZE       (240 * 240 / 10 * (LV_COLOR_DEPTH / 8))
@@ -132,6 +109,7 @@ static void lv_tick_task(void *arg) {
 
 extern "C" void app_main(void)
 {
+    CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application started");
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -139,6 +117,27 @@ extern "C" void app_main(void)
       ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+
+
+    gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
+
+    gpio_set_level(GPIO_NUM_32, 1);
+    gpio_set_level(GPIO_NUM_33, 0);
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    gpio_set_level(GPIO_NUM_32, 0);
+    gpio_set_level(GPIO_NUM_33, 1);
+
+    CControl *control = new CControl();
+    CCommunication *communication = new CCommunication();
+    CHardware *hardware = new CHardware();
+
+    control->subscribe(communication);
+
+    hardware->subscribe(control);
+    hardware->subscribe(communication);
 
     xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
 }

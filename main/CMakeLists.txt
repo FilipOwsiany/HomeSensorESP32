@@ -8,9 +8,14 @@ idf_component_register(
         nvs_flash
         esp_netif
         esp_event
-    # ===== AMC =====
+        esp_timer
+        driver
+    # === CUSTOM ====
+        common
         lvgl
         lvgl_esp32_drivers
-        driver
-        esp_timer
+        control
+        communication
+        hardware
+        utility
 )
