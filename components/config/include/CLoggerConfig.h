@@ -27,6 +27,7 @@ public:
         Main,
         EventPublisherManager,
         BaseQueue,
+        BaseSemaphore,
         BaseTask,
         MessageQueue,
         Hardware,
