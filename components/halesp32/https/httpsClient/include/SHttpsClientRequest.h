@@ -43,22 +43,18 @@ struct SHttpClientRequest
     bool result;
     int respCode;
 
-    // callback pointer (declared after typedef!)
     void (*callback)(SHttpClientRequest&);
 
     SHttpClientRequest();
 };
 
-// ✅ teraz możemy użyć callbacka dopiero po pełnej definicji SHttpClientRequest
 using HttpCallback = void(*)(SHttpClientRequest&);
 
-// ✅ domyślny callback
 inline void defaultHttpClientCallback(SHttpClientRequest& request) 
 {
-    // no-op
+
 }
 
-// ✅ konstruktor (może być też w .cpp jeśli wolisz)
 inline SHttpClientRequest::SHttpClientRequest()
     : host(const_cast<char*>("")),
       port(80),
