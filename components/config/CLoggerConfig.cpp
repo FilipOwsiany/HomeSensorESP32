@@ -12,4 +12,6 @@ CLoggerConfig::SConfig CLoggerConfig::logConfigTable[CLoggerConfig::lm_num] = {
     {CLoggerConfig::CLogLevel::Debug,        CLoggerConfig::CLogModule::Communication,              true,  "communication"},
     {CLoggerConfig::CLogLevel::Debug,        CLoggerConfig::CLogModule::Wifi,                       true,  "wifi"},
     {CLoggerConfig::CLogLevel::Debug,        CLoggerConfig::CLogModule::HttpsClient,                true,  "httpsClient"},
+    {CLoggerConfig::CLogLevel::Debug,        CLoggerConfig::CLogModule::Adc,                        true,  "Adc"},
+    {CLoggerConfig::CLogLevel::Debug,        CLoggerConfig::CLogModule::Bme280,                     true,  "Bme280"},
 };

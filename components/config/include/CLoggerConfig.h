@@ -35,6 +35,8 @@ public:
         Communication,
         Wifi,
         HttpsClient,
+        Adc,
+        Bme280,
 
         All,
 
