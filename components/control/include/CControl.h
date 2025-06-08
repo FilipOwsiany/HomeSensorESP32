@@ -6,6 +6,8 @@
 #include "IEventListener.h"
 #include "IEventPublisherManager.h"
 #include "CBaseTask.h"
+#include "CBme280.h"
+#include "CAdc.h"
 
 #include "IWifi.h"
 
@@ -14,6 +16,8 @@ class CControl : public IEventListener, public IEventPublisherManager, public CB
 private:
     std::vector<IEventListener*> listeners;
     IWifi * wifiInstance = nullptr;
+    CBme280* bme280Sensor = nullptr;
+    CAdc* adc = nullptr;
 public:
     CControl();
     ~CControl();

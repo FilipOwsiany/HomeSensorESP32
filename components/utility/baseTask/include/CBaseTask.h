@@ -18,6 +18,7 @@ protected:
     TaskHandle_t mPxCreatedTask;
 public:
     CBaseTask(std::string taskName, uint32_t stackSize, uint32_t priority, void* params, TaskFunction_t mTaskFunction);
+    CBaseTask();
     ~CBaseTask();
     bool taskInit(void);
     bool taskRun(void);

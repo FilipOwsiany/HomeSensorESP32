@@ -42,7 +42,7 @@ void CHardware::taskFunction(void* pvParameter)
         SEvent event(1, sizeof(uint32_t), 2, static_cast<void*>(&testData));
         self->sendEvent(event);
 
-        self->taskDelay(100);
+        self->taskDelay(1000);
 
         CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "CHardware::taskFunction() free heap [%lu] minimum ever [%lu] largest block [%u]", 
             esp_get_free_heap_size(), esp_get_minimum_free_heap_size(), heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));

@@ -12,6 +12,11 @@ CBaseTask::CBaseTask(std::string taskName, uint32_t stackSize, uint32_t priority
     CLogger::log(CLoggerModule::BaseTask, CLoggerLevel::ImportantInfo, "Params: %p", mParams);
 }
 
+CBaseTask::CBaseTask()
+{
+    CLogger::log(CLoggerModule::BaseTask, CLoggerLevel::Debug, "CBaseTask::CBaseTask() no parameters");
+}
+
 CBaseTask::~CBaseTask()
 {
     CLogger::log(CLoggerModule::BaseTask, CLoggerLevel::Debug, "CBaseTask::~CBaseTask()");
