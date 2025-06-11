@@ -7,9 +7,9 @@
 
 #include "CBaseTask.h"
 
-#include "SBme280.h"
+#include "IBme280.h"
 
-class CBme280 : public CBaseTask
+class CBme280 : public IBme280, public CBaseTask
 {
 public:
     enum class Bmx280TemperatureOversampling {
@@ -85,7 +85,7 @@ public:
             Bmx280StandbyTime standbyTime = Bmx280StandbyTime::STANDBY_1000M,
             Bmx280IirFilter iirFilter = Bmx280IirFilter::NONE);
     ~CBme280();
-    bool read(SBme280& bme280Data);
+    bool read(SBme280& bme280Data) override;
 
 };
 

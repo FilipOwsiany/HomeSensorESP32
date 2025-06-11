@@ -3,6 +3,8 @@
 
 #include "commonStd.h"
 
+#include "IAdc.h"
+
 #include "esp_adc/adc_oneshot.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
@@ -10,7 +12,7 @@
 using adcVoltage = int;
 using adcRaw =  int;
 
-class CAdc
+class CAdc : public IAdc
 {
 private:
     adc_unit_t mUnit;
@@ -20,8 +22,9 @@ private:
 public:
     CAdc(adc_unit_t unit, adc_channel_t channel);
     ~CAdc();
-    adcVoltage readOneShot(void);
-    adcVoltage readAvrage(uint16_t repeat = 100);
+    
+    adcVoltage readOneShot(void) override;
+    adcVoltage readAvrage(uint16_t repeat = 100) override;
 };
 
 #endif //__CADC_H__
