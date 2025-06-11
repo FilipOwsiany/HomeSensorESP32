@@ -11,6 +11,9 @@
 #include "commonLvgl.h"
 #include "CLogger.h"
 
+#include "CAdc.h"
+#include "CBme280.h"
+
 #include "CControl.h"
 #include "CCommunication.h"
 #include "CHardware.h"
@@ -141,40 +144,54 @@ extern "C" void app_main(void)
     // gpio_set_level(GPIO_NUM_32, 1);
     // gpio_set_level(GPIO_NUM_33, 0);
 
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     gpio_set_level(GPIO_NUM_32, 1);
     gpio_set_level(GPIO_NUM_33, 1);
 
-    // CControl *control = new CControl();
-    // CCommunication *communication = new CCommunication();
-    // CHardware *hardware = new CHardware();
+    CAdc* adc = new CAdc(ADC_UNIT_1, ADC_CHANNEL_6); 
 
-    // control->subscribe(communication);
+    CBme280* bme280 = new CBme280 (      CBme280::Bmx280Mode::FORCE,
+                                    CBme280::Bmx280TemperatureOversampling::X16,
+                                    CBme280::Bmx280PressureOversampling::X4,
+                                    CBme280::Bme280HumidityOversampling::X4,
+                                    CBme280::Bmx280StandbyTime::STANDBY_20M,
+                                    CBme280::Bmx280IirFilter::X16);
 
-    // hardware->subscribe(control);
-    // hardware->subscribe(communication);
+    CControl *control = new CControl();
+    CCommunication *communication = new CCommunication();
+    CHardware *hardware = new CHardware(*adc, *bme280);
 
-    //xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
-        esp_sleep_enable_timer_wakeup(1000000);
-        CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application go sleep");
-        esp_light_sleep_start();
-    while (true)
-    {
-        // gpio_set_level(GPIO_NUM_32, 1);
-        // gpio_set_level(GPIO_NUM_33, 0);
+    control->subscribe(communication);
+    control->subscribe(hardware);
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    hardware->subscribe(control);
+    communication->subscribe(control);
 
-        // gpio_set_level(GPIO_NUM_32, 0);
-        // gpio_set_level(GPIO_NUM_33, 1);
+    SEvent eventStartApplication(CommonEventId::ApplicationStart);
+    control->sendEvent(eventStartApplication, true);
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-        esp_sleep_enable_timer_wakeup(1000000);
-        CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application go sleep");
-        esp_light_sleep_start();
-    }
+    // //xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
+    //     esp_sleep_enable_timer_wakeup(1000000);
+    //     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application go sleep");
+    //     esp_light_sleep_start();
+    // while (true)
+    // {
+    //     // gpio_set_level(GPIO_NUM_32, 1);
+    //     // gpio_set_level(GPIO_NUM_33, 0);
+
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    //     // gpio_set_level(GPIO_NUM_32, 0);
+    //     // gpio_set_level(GPIO_NUM_33, 1);
+
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    //     esp_sleep_enable_timer_wakeup(1000000);
+    //     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application go sleep");
+    //     esp_light_sleep_start();
+    // }
     
 }
 
