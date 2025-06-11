@@ -11,6 +11,7 @@ CBme280::CBme280(Bmx280Mode mode,
                  Bmx280StandbyTime standbyTime,
                  Bmx280IirFilter iirFilter)
 {
+    CLogger::log(CLoggerModule::Bme280, CLoggerLevel::Debug, "CBme280 constructor called");
     mI2CConfig = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = GPIO_NUM_17,
