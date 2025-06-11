@@ -46,7 +46,7 @@ void CLogger::log(CLoggerConfig::CLogModule module, CLoggerConfig::CLogLevel log
         default: break;
     }
 
-    logString += entry.prefix;
+    logString += entry.prefix + ": ";
 
     if (logString.length() > 128)
     {
