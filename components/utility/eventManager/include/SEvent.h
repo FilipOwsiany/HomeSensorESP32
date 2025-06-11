@@ -2,16 +2,18 @@
 #define __SEVENT_H__
 
 #include "commonStd.h"
+#include "commonEvent.h"
 
 struct SEvent
 {
-    uint32_t mEventId;
+    CommonEventId mEventId;
     uint32_t mDataSize;
     uint32_t mTime;
     void* mData;
 
-    SEvent() : mEventId(0), mDataSize(0), mTime(0), mData(nullptr) {}
-    SEvent(uint32_t eventId, uint32_t dataSize, uint32_t time, void* data)
+    SEvent() : mEventId(CommonEventId::None), mDataSize(0), mTime(0), mData(nullptr) {}
+    SEvent(CommonEventId eventId) : mEventId(eventId), mDataSize(0), mTime(0), mData(nullptr) {}
+    SEvent(CommonEventId eventId, uint32_t dataSize, uint32_t time, void* data)
         : mEventId(eventId), mDataSize(dataSize), mTime(time), mData(data) {}
 };
 

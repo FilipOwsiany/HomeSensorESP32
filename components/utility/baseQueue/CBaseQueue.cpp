@@ -28,7 +28,7 @@ CBaseQueue::~CBaseQueue()
 bool CBaseQueue::queueSend(SEvent& event, TickType_t waitTime)
 {
     CMessageQueue message = CMessageQueue(event);
-    if(message.mEvent.mEventId == 0 && message.mEvent.mDataSize == 0 && message.mEvent.mData == NULL && message.mEvent.mTime == 0) 
+    if(message.mEvent.mEventId == CommonEventId::None && message.mEvent.mDataSize == 0 && message.mEvent.mData == NULL && message.mEvent.mTime == 0) 
     {
         CLogger::log(CLoggerModule::BaseQueue, CLoggerLevel::Error, "Invalid event data");
         return false;

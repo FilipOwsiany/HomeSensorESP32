@@ -19,7 +19,7 @@ public:
     void unsubscribe(IEventListener* listener) override;
     void notify(SEvent& event) override;
 
-    virtual void sendEvent(SEvent& event) = 0;
+    virtual void sendEvent(SEvent& event, bool selfNotify) = 0;
 };
 
 
