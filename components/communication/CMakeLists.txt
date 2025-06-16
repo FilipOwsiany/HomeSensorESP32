@@ -7,4 +7,6 @@ idf_component_register(
     # === CUSTOM ====
     common
     utility
+    halesp32
 )
+

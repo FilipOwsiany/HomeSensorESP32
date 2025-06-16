@@ -7,6 +7,8 @@ void CLogger::log(CLoggerConfig::CLogModule module, CLoggerConfig::CLogLevel log
 {
     const auto& entry = CLoggerConfig::logConfigTable[static_cast<uint8_t>(module)];
 
+    return;
+
     if (!entry.isLogEnable) 
     {
         return;

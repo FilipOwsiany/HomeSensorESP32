@@ -2,9 +2,13 @@
 #include "nvs_flash.h"
 #include "esp_timer.h"
 #include "esp_pm.h"
+
 #include "esp_sleep.h"
+#include "esp_cpu.h"
+#include "esp_rom_sys.h"
+#include "esp_wake_stub.h"
+
 #include "driver/gpio.h"
-#include "driver/i2c.h"
 // ======== CUSTOM =========
 #include "commonStd.h"
 #include "commonOs.h"
@@ -115,16 +119,6 @@ static void lv_tick_task(void *arg) {
 
 extern "C" void app_main(void)
 {
-    esp_pm_config_t pm_config = {
-    .max_freq_mhz = 160,
-    .min_freq_mhz = 40,
-    #if CONFIG_FREERTOS_USE_TICKLESS_IDLE
-    .light_sleep_enable = true
-    #endif
-    };
-    ESP_ERROR_CHECK(esp_pm_configure(&pm_config));
-
-
     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application started");
 
     esp_err_t ret = nvs_flash_init();
@@ -134,29 +128,35 @@ extern "C" void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    esp_pm_config_t pm_config = {
+        .max_freq_mhz = 160,
+        .min_freq_mhz = 40,
+        .light_sleep_enable = false
+    };
+    ESP_ERROR_CHECK(esp_pm_configure(&pm_config));
 
-    gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
+
     gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
-    gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
+    gpio_set_direction(GPIO_NUM_32, GPIO_MODE_OUTPUT);
+    // gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
 
+    gpio_set_level(GPIO_NUM_33, 1);
+    gpio_set_level(GPIO_NUM_32, 0);
     // gpio_set_level(GPIO_NUM_4, 1);
-
-    // gpio_set_level(GPIO_NUM_32, 1);
-    // gpio_set_level(GPIO_NUM_33, 0);
 
     // vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    gpio_set_level(GPIO_NUM_32, 1);
-    gpio_set_level(GPIO_NUM_33, 1);
+    // gpio_set_level(GPIO_NUM_32, 0);
+    // gpio_set_level(GPIO_NUM_33, 1);
 
-    CAdc* adc = new CAdc(ADC_UNIT_1, ADC_CHANNEL_6); 
+    CBme280* bme280 = new       CBme280 (CBme280::Bmx280Mode::FORCE,
+                                CBme280::Bmx280TemperatureOversampling::X16,
+                                CBme280::Bmx280PressureOversampling::X4,
+                                CBme280::Bme280HumidityOversampling::X4,
+                                CBme280::Bmx280StandbyTime::STANDBY_20M,
+                                CBme280::Bmx280IirFilter::X16);
 
-    CBme280* bme280 = new CBme280 (      CBme280::Bmx280Mode::FORCE,
-                                    CBme280::Bmx280TemperatureOversampling::X16,
-                                    CBme280::Bmx280PressureOversampling::X4,
-                                    CBme280::Bme280HumidityOversampling::X4,
-                                    CBme280::Bmx280StandbyTime::STANDBY_20M,
-                                    CBme280::Bmx280IirFilter::X16);
+    CAdc* adc = new CAdc(ADC_UNIT_1, ADC_CHANNEL_6);     
 
     CControl *control = new CControl();
     CCommunication *communication = new CCommunication();
@@ -166,33 +166,26 @@ extern "C" void app_main(void)
     control->subscribe(hardware);
 
     hardware->subscribe(control);
-    communication->subscribe(control);
 
-    SEvent eventStartApplication(CommonEventId::ApplicationStart);
-    control->sendEvent(eventStartApplication, true);
+    SEvent eventApplicationStart(CommonEventId::ApplicationStart);
+    control->sendEvent(eventApplicationStart, true);
 
+    //xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
 
-    // //xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
-    //     esp_sleep_enable_timer_wakeup(1000000);
-    //     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application go sleep");
-    //     esp_light_sleep_start();
     // while (true)
     // {
-    //     // gpio_set_level(GPIO_NUM_32, 1);
-    //     // gpio_set_level(GPIO_NUM_33, 0);
-
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-    //     // gpio_set_level(GPIO_NUM_32, 0);
-    //     // gpio_set_level(GPIO_NUM_33, 1);
-
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-    //     esp_sleep_enable_timer_wakeup(1000000);
-    //     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Application go sleep");
-    //     esp_light_sleep_start();
+    //     adc->readAvrage(100);
+    //     vTaskDelay(100 / portTICK_PERIOD_MS);
     // }
-    
+
+    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(300 * 1000000));
+
+    vTaskDelay(10000 / portTICK_PERIOD_MS);
+
+    CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Entering deep sleep mode");
+    printf("Entering deep sleep mode\n");
+
+    esp_deep_sleep_start();
 }
 
 

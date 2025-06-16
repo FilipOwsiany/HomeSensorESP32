@@ -2,6 +2,8 @@
 
 #include "CLogger.h"
 
+#include "driver/gpio.h"
+
 CHardware::CHardware(IAdc& aItsAdc, IBme280& aItsBme280) : 
         CBaseTask("CHardware", 4096, 10, this, CHardware::taskFunction),
         mItsBme280(aItsBme280),
@@ -20,6 +22,7 @@ CHardware::CHardware(IAdc& aItsAdc, IBme280& aItsBme280) :
         return;
     }
 
+    gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
 }
 
 CHardware::~CHardware()
@@ -54,7 +57,7 @@ void CHardware::onEvent(SEvent& event)
 
 void CHardware::parseEvent(SEvent& event)
 {
-    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "parseEvent()");
+    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Success, "parseEvent() %d", event.mEventId);
     switch (event.mEventId)
     {
     case CommonEventId::ReadAdcRequest:
@@ -71,7 +74,12 @@ void CHardware::parseEvent(SEvent& event)
     case CommonEventId::SendAdcRequest:
         {
             CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Send ADC request");
+
+            gpio_set_level(GPIO_NUM_4, 1);
+            vTaskDelay(50);
             adcVoltage voltage = mItsAdc.readAvrage(100);
+            gpio_set_level(GPIO_NUM_4, 0);
+            vTaskDelay(50);
 
             SEvent eventSendAdcRequest(CommonEventId::SendAdcRequest, sizeof(adcVoltage), 0, static_cast<void*>(&voltage));
             sendEvent(eventSendAdcRequest, false);

@@ -3,6 +3,8 @@
 
 #include "commonStd.h"
 
+#define LOG_ENABLE  0
+
 class CLoggerConfig
 {
 private:
