@@ -15,8 +15,6 @@
 #include "commonLvgl.h"
 #include "CLogger.h"
 
-#include "CAdc.h"
-#include "CBme280.h"
 
 #include "CControl.h"
 #include "CCommunication.h"
@@ -148,19 +146,10 @@ extern "C" void app_main(void)
 
     // gpio_set_level(GPIO_NUM_32, 0);
     // gpio_set_level(GPIO_NUM_33, 1);
-
-    CBme280* bme280 = new       CBme280 (CBme280::Bmx280Mode::FORCE,
-                                CBme280::Bmx280TemperatureOversampling::X16,
-                                CBme280::Bmx280PressureOversampling::X4,
-                                CBme280::Bme280HumidityOversampling::X4,
-                                CBme280::Bmx280StandbyTime::STANDBY_20M,
-                                CBme280::Bmx280IirFilter::X16);
-
-    CAdc* adc = new CAdc(ADC_UNIT_1, ADC_CHANNEL_6);     
-
+   
     CControl *control = new CControl();
     CCommunication *communication = new CCommunication();
-    CHardware *hardware = new CHardware(*adc, *bme280);
+    CHardware *hardware = new CHardware();
 
     control->subscribe(communication);
     control->subscribe(hardware);

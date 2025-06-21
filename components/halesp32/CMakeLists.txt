@@ -5,11 +5,13 @@ idf_component_register(
                         "bme280/bme280.c"
                         "bme280/bme280_support.c"
                         "bme280/CBme280.cpp"
+                        "halEspressif32Factory/CHalEspressifFactory.cpp"
                         "https/httpsClient/CHttpsClient.cpp"
      
     INCLUDE_DIRS        "adc/include"    
                         "bme280/include"
                         "wifi/include"
+                        "halEspressif32Factory/include"
                         "https/httpsClient/include"
     REQUIRES
     # ===== IDF =====

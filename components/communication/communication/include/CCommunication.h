@@ -4,14 +4,14 @@
 #include "commonStd.h"
 #include "commonEvent.h"
 
-#include "IEventListener.h"
-#include "IEventPublisherManager.h"
+#include "EventHelper.h"
 #include "CBaseTask.h"
 
 class CCommunication : public IEventListener, public IEventPublisherManager, public CBaseTask
 {
 private:
     void parseEvent(SEvent& event);
+    friend void processQueueEvent<CCommunication>(CCommunication& self, CLoggerModule loggerModule);
 public:
     CCommunication();
     ~CCommunication();

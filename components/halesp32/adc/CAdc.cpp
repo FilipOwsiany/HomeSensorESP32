@@ -2,19 +2,19 @@
 
 #include "CLogger.h"
 
-CAdc::CAdc(adc_unit_t unit, adc_channel_t channel) : mUnit(unit), mChannel(channel)
+CAdc::CAdc(CAdc::EAdcUnit unit, CAdc::EAdcChannel channel) : mUnit(unit), mChannel(channel)
 {
     CLogger::log(CLoggerModule::Adc, CLoggerLevel::Debug, "CAdc constructor called");
-    CLogger::log(CLoggerModule::Adc, CLoggerLevel::Debug, "Unit: %d, Channel: %d", unit, channel);
+    CLogger::log(CLoggerModule::Adc, CLoggerLevel::Debug, "Unit: %d, Channel: %d", mUnit, mChannel);
     adc_cali_line_fitting_config_t caliConfig = {};
-    caliConfig.unit_id = unit;
+    caliConfig.unit_id = static_cast<adc_unit_t>(mUnit);
     caliConfig.atten = ADC_ATTEN_DB_12;
     caliConfig.bitwidth = ADC_BITWIDTH_12;
 
 	ESP_ERROR_CHECK(adc_cali_create_scheme_line_fitting(&caliConfig, &mAdcCali));
 
 	adc_oneshot_unit_init_cfg_t oneshotUnitConfig = {};
-	oneshotUnitConfig.unit_id = unit;
+	oneshotUnitConfig.unit_id = static_cast<adc_unit_t>(mUnit);
 	oneshotUnitConfig.ulp_mode = ADC_ULP_MODE_DISABLE;
 
 	ESP_ERROR_CHECK(adc_oneshot_new_unit(&oneshotUnitConfig, &mAdcHandle));
@@ -23,7 +23,7 @@ CAdc::CAdc(adc_unit_t unit, adc_channel_t channel) : mUnit(unit), mChannel(chann
     config.atten= ADC_ATTEN_DB_12;
     config.bitwidth = ADC_BITWIDTH_12;
 
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(mAdcHandle, channel, &config));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(mAdcHandle, static_cast<adc_channel_t>(mChannel), &config));
 }
 
 CAdc::~CAdc()
@@ -37,7 +37,7 @@ adcVoltage CAdc::readOneShot(void)
     adcRaw rawRead = 0;
     do
     {
-        ret = adc_oneshot_read(mAdcHandle, mChannel, static_cast<int*>(&rawRead));
+        ret = adc_oneshot_read(mAdcHandle, static_cast<adc_channel_t>(mChannel), static_cast<int*>(&rawRead));
     } while (ret == ESP_ERR_INVALID_STATE);
     adcVoltage voltage = 0;
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(mAdcCali, rawRead, &voltage));
@@ -54,7 +54,7 @@ adcVoltage CAdc::readAvrage(uint16_t repeat)
         adcRaw rawRead = 0;
         do
         {
-            ret = adc_oneshot_read(mAdcHandle, mChannel, static_cast<int*>(&rawRead));
+            ret = adc_oneshot_read(mAdcHandle, static_cast<adc_channel_t>(mChannel), static_cast<int*>(&rawRead));
         } while (ret == ESP_ERR_INVALID_STATE);
         rawSum += rawRead;
     }

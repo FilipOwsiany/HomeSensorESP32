@@ -4,7 +4,7 @@
 #include "commonStd.h"
 #include "commonEvent.h"
 
-#include "IEventPublisherManager.h"
+#include "EventHelper.h"
 #include "CBaseTask.h"
 
 #include "IBme280.h"
@@ -15,10 +15,12 @@ class CHardware : public IEventListener, public IEventPublisherManager, public C
 private:
     IBme280& mItsBme280;
     IAdc& mItsAdc;
+    CLoggerHelper mLog;
 
     void parseEvent(SEvent& event);
+    friend void processQueueEvent<CHardware>(CHardware& self, CLoggerModule loggerModule);
 public:
-    CHardware(IAdc& aItsAdc, IBme280& aItsBme280);
+    CHardware();
     ~CHardware();
 
     void sendEvent(SEvent& event, bool selfNotify) override;

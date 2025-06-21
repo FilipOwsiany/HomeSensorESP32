@@ -1,13 +1,15 @@
 #include "CHardware.h"
 
-#include "CLogger.h"
+#include "CHalEspressifFactory.h"
 
 #include "driver/gpio.h"
 
-CHardware::CHardware(IAdc& aItsAdc, IBme280& aItsBme280) : 
-        CBaseTask("CHardware", 4096, 10, this, CHardware::taskFunction),
-        mItsBme280(aItsBme280),
-        mItsAdc(aItsAdc)
+CHardware::CHardware() :
+    IEventListener(10), 
+    CBaseTask("CHardware", 4096, 10, this, CHardware::taskFunction),
+    mItsBme280(CHalEspressifFactory::createBme280()),
+    mItsAdc(CHalEspressifFactory::createAdc()),
+    mLog(CLoggerConfig::CLogModule::Hardware)
 {
     CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "CHardware()");
     if (taskInit() == false) 
@@ -129,46 +131,10 @@ void CHardware::parseEvent(SEvent& event)
 
 void CHardware::taskFunction(void* pvParameter)
 {
-    CHardware* self = static_cast<CHardware*>(pvParameter);
-
-    // SEvent event(1, sizeof(uint32_t), 2, new uint32_t(1234));
-    // while (1) 
-    // {
-    //     self->taskDelay(100);
-
-    //     static uint32_t testData = 0;
-    //     testData++;
-    //     SEvent event(1, sizeof(uint32_t), 2, static_cast<void*>(&testData));
-    //     self->sendEvent(event);
-
-    //     self->taskDelay(1000);
-
-    //     CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "CHardware::taskFunction() free heap [%lu] minimum ever [%lu] largest block [%u]", 
-    //         esp_get_free_heap_size(), esp_get_minimum_free_heap_size(), heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
-    // }
+    CHardware& self = *static_cast<CHardware*>(pvParameter);
 
     while (1) 
     {
-        SEvent event;
-        if (self->queueReceive(event, portMAX_DELAY) == true) 
-        {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "taskFunction(): Received message, size: %ld", event.mDataSize);
-            if (event.mEventId == CommonEventId::None && event.mDataSize == 0 && event.mData == nullptr && event.mTime == 0) 
-            {
-                CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Error, "taskFunction(): Invalid event data");
-                continue;
-            }
-            self->parseEvent(event);
-        }
-        else 
-        {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Error, "taskFunction(): Failed to receive message");
-        }
-
-        if (self->queueGetSize() == 0) 
-        {
-            self->taskSuspend();
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "taskFunction(): No messages in queue, suspending task");
-        }
+        processQueueEvent(self, CLoggerModule::Hardware);
     }
 }

@@ -14,13 +14,34 @@ using adcRaw =  int;
 
 class CAdc : public IAdc
 {
-private:
-    adc_unit_t mUnit;
-    adc_channel_t mChannel;
-    adc_cali_handle_t mAdcCali;
-    adc_oneshot_unit_handle_t mAdcHandle;
 public:
-    CAdc(adc_unit_t unit, adc_channel_t channel);
+    enum class EAdcUnit 
+    {
+        UNIT_1,
+        UNIT_2
+    };
+
+    enum class EAdcChannel 
+    {
+        CHANNEL_0,
+        CHANNEL_1,
+        CHANNEL_2,
+        CHANNEL_3,
+        CHANNEL_4,
+        CHANNEL_5,
+        CHANNEL_6,
+        CHANNEL_7,
+        CHANNEL_8,
+        CHANNEL_9
+    };
+private:
+    CAdc::EAdcUnit              mUnit;
+    CAdc::EAdcChannel           mChannel;
+    
+    adc_cali_handle_t           mAdcCali;
+    adc_oneshot_unit_handle_t   mAdcHandle;
+public:
+    CAdc(CAdc::EAdcUnit unit, CAdc::EAdcChannel channel);
     ~CAdc();
     
     adcVoltage readOneShot(void) override;

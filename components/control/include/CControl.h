@@ -4,8 +4,7 @@
 #include "commonStd.h"
 #include "commonEvent.h"
 
-#include "IEventListener.h"
-#include "IEventPublisherManager.h"
+#include "EventHelper.h"
 #include "CBaseTask.h"
 
 #include "SBme280.h"
@@ -15,10 +14,11 @@
 class CControl : public IEventListener, public IEventPublisherManager, public CBaseTask
 {
 private:
-    std::vector<IEventListener*> listeners;
-    IWifi * wifiInstance = nullptr;
 
+    std::vector<IEventListener*> listeners;
+    IWifi& mItsWifi;
     void parseEvent(SEvent& event);
+    friend void processQueueEvent<CControl>(CControl& self, CLoggerModule loggerModule);
 public:
     CControl();
     ~CControl();

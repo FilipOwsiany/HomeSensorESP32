@@ -121,40 +121,31 @@ void CWifi::connect()
 
 void CWifi::disconnect()
 {
-    // Tutaj możesz zaimplementować logikę rozłączania z Wi-Fi
-    // np. esp_wifi_disconnect()
+
 }
 
 bool CWifi::isConnected()
 {
-    // Tutaj możesz zaimplementować logikę sprawdzania stanu połączenia
-    // np. esp_wifi_sta_get_ap_info()
     return false;
 }
 
 void CWifi::setSSID(const std::string& ssid)
 {
-    // Tutaj możesz ustawić SSID
-    // np. strcpy(wifiConfig.sta.ssid, ssid.c_str());
+
 }
 
 void CWifi::setPassword(const std::string& password)
 {
-    // Tutaj możesz ustawić hasło
-    // np. strcpy(wifiConfig.sta.password, password.c_str());
+
 }
 
 std::string CWifi::getSSID()
 {
-    // Tutaj możesz zwrócić SSID
-    // np. return std::string(wifiConfig.sta.ssid);
     return "";
 }
 
 std::string CWifi::getPassword()
 {
-    // Tutaj możesz zwrócić hasło
-    // np. return std::string(wifiConfig.sta.password);
     return "";
 }
 
