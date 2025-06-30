@@ -5,7 +5,6 @@ idf_component_register(
                     "baseTask/CBaseTask.cpp"
                     "eventManager/IEventPublisherManager.cpp"
                     "logger/CLogger.cpp"
-                    "logger/CLoggerHelper.cpp"
      
     INCLUDE_DIRS    "baseQueue/include"
                     "baseSemaphore/include"
