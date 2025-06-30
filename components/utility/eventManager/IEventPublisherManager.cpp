@@ -31,7 +31,6 @@ void IEventPublisherManager::notify(SEvent& event)
 {
     CLogger::log(CLoggerModule::EventPublisherManager, CLoggerLevel::Debug, "IEventPublisherManager::notify()");
     for (auto listener : listeners) {
-        printf("IEventPublisherManager::notify() listener: %p\n", listener);
         listener->onEvent(event);
     }
 }

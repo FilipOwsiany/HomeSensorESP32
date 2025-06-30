@@ -39,9 +39,8 @@ void processQueueEvent(T& self, CLoggerModule loggerModule)
 
     if (self.queueGetSize() == 0)
     {
+        CLogger::log(loggerModule, CLoggerLevel::Performance, "taskFunction(): No messages in queue, suspending task");
         self.taskSuspend();
-        CLogger::log(loggerModule, CLoggerLevel::Debug,
-                     "taskFunction(): No messages in queue, suspending task");
     }
 }
 
