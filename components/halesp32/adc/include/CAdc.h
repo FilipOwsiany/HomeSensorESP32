@@ -40,6 +40,8 @@ private:
     
     adc_cali_handle_t           mAdcCali;
     adc_oneshot_unit_handle_t   mAdcHandle;
+
+    const float                 VOLTAGE_DIVIDER_RATIO = 2.0f;
 public:
     CAdc(CAdc::EAdcUnit unit, CAdc::EAdcChannel channel);
     ~CAdc();

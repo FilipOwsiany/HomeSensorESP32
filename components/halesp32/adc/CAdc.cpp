@@ -42,7 +42,7 @@ adcVoltage CAdc::readOneShot(void)
     adcVoltage voltage = 0;
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(mAdcCali, rawRead, &voltage));
     CLogger::log(CLoggerModule::Adc, CLoggerLevel::Debug, "ADC Read: %d, Voltage: %d", rawRead, voltage);
-    return voltage;
+    return voltage * VOLTAGE_DIVIDER_RATIO;
 }
 
 adcVoltage CAdc::readAvrage(uint16_t repeat)
@@ -61,5 +61,5 @@ adcVoltage CAdc::readAvrage(uint16_t repeat)
     adcVoltage voltage = 0;
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(mAdcCali, rawSum / repeat, &voltage));
     CLogger::log(CLoggerModule::Adc, CLoggerLevel::Debug, "ADC Read Average: %d, Voltage: %d", rawSum / repeat, voltage);
-    return voltage;
+    return voltage * VOLTAGE_DIVIDER_RATIO;
 }
