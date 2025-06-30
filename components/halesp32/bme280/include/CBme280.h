@@ -86,6 +86,7 @@ public:
             Bmx280IirFilter iirFilter = Bmx280IirFilter::NONE);
     ~CBme280();
     bool read(SBme280& bme280Data) override;
+    bool readAvrage(SBme280& bme280Data, uint8_t count) override;
 
 };
 

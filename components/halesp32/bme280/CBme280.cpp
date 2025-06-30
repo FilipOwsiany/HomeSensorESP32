@@ -75,3 +75,35 @@ bool CBme280::read(SBme280& bme280Data)
                 bme280Data.temperature, bme280Data.pressure, bme280Data.humidity);
     return true;
 }
+
+bool CBme280::readAvrage(SBme280& bme280Data, uint8_t count)
+{
+    if (count == 0) 
+    {
+        CLogger::log(CLoggerModule::Bme280, CLoggerLevel::Error, "Count must be greater than 0");
+        return false;
+    }
+
+    SBme280 sumData;
+    for (uint8_t i = 0; i < count; ++i) 
+    {
+        SBme280 currentData;
+        if (!read(currentData)) 
+        {
+            CLogger::log(CLoggerModule::Bme280, CLoggerLevel::Error, "Failed to read BME280 data");
+            return false;
+        }
+        sumData.temperature += currentData.temperature;
+        sumData.pressure += currentData.pressure;
+        sumData.humidity += currentData.humidity;
+    }
+
+    bme280Data.temperature = sumData.temperature / count;
+    bme280Data.pressure = sumData.pressure / count;
+    bme280Data.humidity = sumData.humidity / count;
+
+    CLogger::log(CLoggerModule::Bme280, CLoggerLevel::Debug, "Average Values: temperature = %f, pressure = %f, humidity = %f", 
+                bme280Data.temperature, bme280Data.pressure, bme280Data.humidity);
+
+    return true;
+}
