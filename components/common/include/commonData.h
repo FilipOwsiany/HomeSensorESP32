@@ -8,12 +8,13 @@ struct SMeassurment
     float mTemperature;
     float mHumidity;
     float mPressure;
+    float mVoltage;
 
-    SMeassurment() : mTemperature(0.0f), mHumidity(0.0f), mPressure(0.0f) {}
-    SMeassurment(float temperature, float humidity, float pressure)
-        : mTemperature(temperature), mHumidity(humidity), mPressure(pressure) {}
+    SMeassurment() : mTemperature(0.0f), mHumidity(0.0f), mPressure(0.0f), mVoltage(0.0f) {}
+    SMeassurment(float temperature, float humidity, float pressure, float voltage)
+        : mTemperature(temperature), mHumidity(humidity), mPressure(pressure), mVoltage(voltage) {}
     SMeassurment(const SMeassurment& other)
-        : mTemperature(other.mTemperature), mHumidity(other.mHumidity), mPressure(other.mPressure) {}
+        : mTemperature(other.mTemperature), mHumidity(other.mHumidity), mPressure(other.mPressure), mVoltage(other.mVoltage) {}
     SMeassurment& operator=(const SMeassurment& other)
     {
         if (this != &other)
@@ -21,6 +22,7 @@ struct SMeassurment
             mTemperature = other.mTemperature;
             mHumidity = other.mHumidity;
             mPressure = other.mPressure;
+            mVoltage = other.mVoltage;
         }
         return *this;
     }

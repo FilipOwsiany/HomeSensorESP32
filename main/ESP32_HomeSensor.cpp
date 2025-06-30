@@ -20,6 +20,8 @@
 #include "CCommunication.h"
 #include "CHardware.h"
 
+#include "CBme280.h"
+
 #define LV_TICK_PERIOD_MS   1
 #define DRAW_BUF_SIZE       (240 * 240 / 10 * (LV_COLOR_DEPTH / 8))
 
@@ -146,10 +148,17 @@ extern "C" void app_main(void)
 
     // gpio_set_level(GPIO_NUM_32, 0);
     // gpio_set_level(GPIO_NUM_33, 1);
+
+    CBme280 *bme280 = new CBme280(CBme280::Bmx280Mode::FORCE,
+                          CBme280::Bmx280TemperatureOversampling::X16,
+                          CBme280::Bmx280PressureOversampling::X4,
+                          CBme280::Bme280HumidityOversampling::X4,
+                          CBme280::Bmx280StandbyTime::STANDBY_20M,
+                          CBme280::Bmx280IirFilter::X16);
    
     CControl *control = new CControl();
     CCommunication *communication = new CCommunication();
-    CHardware *hardware = new CHardware();
+    CHardware *hardware = new CHardware(*bme280);
 
     control->subscribe(communication);
     control->subscribe(hardware);
@@ -167,9 +176,21 @@ extern "C" void app_main(void)
     //     vTaskDelay(100 / portTICK_PERIOD_MS);
     // }
 
+    //xTaskCreate(bme280_task, "bme280_task", 20 * 1024, NULL, 10, NULL);
+
+    // CBme280 *bme280 = new CBme280(CBme280::Bmx280Mode::FORCE,
+    //                       CBme280::Bmx280TemperatureOversampling::X16,
+    //                       CBme280::Bmx280PressureOversampling::X4,
+    //                       CBme280::Bme280HumidityOversampling::X4,
+    //                       CBme280::Bmx280StandbyTime::STANDBY_20M,
+    //                       CBme280::Bmx280IirFilter::X16);
+
+    // SBme280 bme280Data;
+    // bme280->read(bme280Data);
+
     ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(300 * 1000000));
 
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
+    vTaskDelay(8000 / portTICK_PERIOD_MS);
 
     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Entering deep sleep mode");
     printf("Entering deep sleep mode\n");
