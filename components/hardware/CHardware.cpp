@@ -1,26 +1,27 @@
 #include "CHardware.h"
-
 #include "CHalEspressifFactory.h"
-
 #include "driver/gpio.h"
 
-CHardware::CHardware() :
+#include "CBme280.h"
+
+CHardware::CHardware(IBme280& aItsBme280) :
     IEventListener(10), 
     CBaseTask("CHardware", 4096, 10, this, CHardware::taskFunction),
-    mItsBme280(CHalEspressifFactory::createBme280()),
+    mItsBme280(aItsBme280),
     mItsAdc(CHalEspressifFactory::createAdc()),
     mLog(CLoggerConfig::CLogModule::Hardware)
 {
-    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "CHardware()");
+    mLog.debug("%s", __FUNCTION__);
+
     if (taskInit() == false) 
     {
-        CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Error, "taskInit() failed");
+        mLog.error("%s: taskInit() failed", __FUNCTION__);
         return;
     }
 
     if (taskRun() == false) 
     {
-        CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Error, "taskRun() failed");
+        mLog.error("%s: taskRun() failed", __FUNCTION__);
         return;
     }
 
@@ -29,12 +30,12 @@ CHardware::CHardware() :
 
 CHardware::~CHardware()
 {
-    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "~CHardware()");
+
 }
 
 void CHardware::sendEvent(SEvent& event, bool selfNotify)
 {
-    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "sendEvent()");
+    mLog.debug("%s", __FUNCTION__);
     if (selfNotify) 
     {
         onEvent(event);
@@ -47,10 +48,10 @@ void CHardware::sendEvent(SEvent& event, bool selfNotify)
 
 void CHardware::onEvent(SEvent& event)
 {
-    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Debug, "onEvent()");
+    mLog.debug("%s", __FUNCTION__);
     if (event.mEventId == CommonEventId::None) 
     {
-        CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Error, "onEvent(): Invalid event data");
+        mLog.error("%s: invalid event data", __FUNCTION__);
         return;
     }
     queueSend(event, portMAX_DELAY);
@@ -59,13 +60,12 @@ void CHardware::onEvent(SEvent& event)
 
 void CHardware::parseEvent(SEvent& event)
 {
-    CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Success, "parseEvent() %d", event.mEventId);
+    mLog.importantInfo("%s: %d", __FUNCTION__, event.mEventId);
     switch (event.mEventId)
     {
     case CommonEventId::ReadAdcRequest:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Read ADC value");
-
+            mLog.importantInfo("%s: read ADC value", __FUNCTION__);
             SEvent eventReadAdcACK(CommonEventId::ReadAdcACK);
             sendEvent(eventReadAdcACK, false);
 
@@ -75,13 +75,12 @@ void CHardware::parseEvent(SEvent& event)
         }
     case CommonEventId::SendAdcRequest:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Send ADC request");
-
+            mLog.importantInfo("%s: send ADC request", __FUNCTION__);
             gpio_set_level(GPIO_NUM_4, 1);
-            vTaskDelay(50);
+            vTaskDelay(5);
             adcVoltage voltage = mItsAdc.readAvrage(100);
             gpio_set_level(GPIO_NUM_4, 0);
-            vTaskDelay(50);
+            vTaskDelay(5);
 
             SEvent eventSendAdcRequest(CommonEventId::SendAdcRequest, sizeof(adcVoltage), 0, static_cast<void*>(&voltage));
             sendEvent(eventSendAdcRequest, false);
@@ -89,12 +88,12 @@ void CHardware::parseEvent(SEvent& event)
         }
     case CommonEventId::SendAdcACK:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Send ADC ACK");
+            mLog.importantInfo("%s: send ADC ACK", __FUNCTION__);
             break;
         }
     case CommonEventId::ReadBme280Request:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Read BME280 sensor data");
+            mLog.importantInfo("%s: read BME280 sensor data", __FUNCTION__);
             SEvent eventReadBme280ACK(CommonEventId::ReadBme280ACK);
             sendEvent(eventReadBme280ACK, false);
             SEvent eventSendBme280Request(CommonEventId::SendBme280Request);
@@ -103,9 +102,10 @@ void CHardware::parseEvent(SEvent& event)
         }
     case CommonEventId::SendBme280Request:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Read BME280 sensor data");
+            mLog.importantInfo("%s: read BME280 sensor data", __FUNCTION__);
             SBme280 bme280Data(0.0f, 0.0f, 0.0f);
-            mItsBme280.read(bme280Data);
+
+            mItsBme280.readAvrage(bme280Data, 20);
 
             SEvent eventSendBme280Request(CommonEventId::SendBme280Request, sizeof(SBme280), 0, static_cast<void*>(&bme280Data));
             sendEvent(eventSendBme280Request, false);
@@ -113,12 +113,12 @@ void CHardware::parseEvent(SEvent& event)
         }
     case CommonEventId::SendBme280ACK:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::ImportantInfo, "parseEvent(): Send BME280 ACK");
+            mLog.importantInfo("%s: send BME280 ACK", __FUNCTION__);
             break;
         }
     default:
         {
-            CLogger::log(CLoggerModule::Hardware, CLoggerLevel::Warning, "parseEvent(): Unknown event ID: %u", event.mEventId);
+            mLog.warning("%s: unknown event ID: %u", __FUNCTION__, static_cast<CommonEventId>(event.mEventId));
             break;
         }
     }
@@ -135,6 +135,6 @@ void CHardware::taskFunction(void* pvParameter)
 
     while (1) 
     {
-        processQueueEvent(self, CLoggerModule::Hardware);
+        processQueueEvent(self, CLoggerConfig::CLogModule::Hardware);
     }
 }

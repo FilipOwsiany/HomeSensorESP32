@@ -3,6 +3,7 @@
 
 #include "commonStd.h"
 #include "commonEvent.h"
+#include "commonData.h"
 
 #include "EventHelper.h"
 #include "CBaseTask.h"
@@ -17,6 +18,9 @@ private:
 
     std::vector<IEventListener*> listeners;
     IWifi& mItsWifi;
+    CLoggerHelper mLog;
+    SMeassurment mMeasurement;
+
     void parseEvent(SEvent& event);
     friend void processQueueEvent<CControl>(CControl& self, CLoggerModule loggerModule);
 public:

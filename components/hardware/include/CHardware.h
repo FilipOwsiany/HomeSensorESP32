@@ -20,7 +20,7 @@ private:
     void parseEvent(SEvent& event);
     friend void processQueueEvent<CHardware>(CHardware& self, CLoggerModule loggerModule);
 public:
-    CHardware();
+    CHardware(IBme280& aItsBme280);
     ~CHardware();
 
     void sendEvent(SEvent& event, bool selfNotify) override;
