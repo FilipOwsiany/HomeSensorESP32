@@ -3,11 +3,11 @@
 
 #include "commonStd.h"
 
-#include "SHttpsClientRequest.h"
+#include "IHttpsClient.h"
 
 #include "esp_http_client.h"
 
-class CHttpsClient
+class CHttpsClient : public IHttpsClient
 {
 private:
     SHttpClientRequest mRequest;
@@ -16,10 +16,10 @@ private:
     void httpsStatusHandler(SHttpClientRequest& request);
     static esp_err_t httpsEventHandler(esp_http_client_event_t *event);
 public:
-    CHttpsClient(/* args */);
+    CHttpsClient();
     ~CHttpsClient();
 
-    bool sendRequest(SHttpClientRequest& request);
+    bool sendRequest(SHttpClientRequest& request) override;
 };
 
 #endif //__CHTTPSCLIENT_H__

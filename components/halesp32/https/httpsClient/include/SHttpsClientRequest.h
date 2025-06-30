@@ -46,6 +46,14 @@ struct SHttpClientRequest
     void (*callback)(SHttpClientRequest&);
 
     SHttpClientRequest();
+    SHttpClientRequest(char* aHost, int aPort, char* aPath, Method aMethod,
+                                              bool aUseHttps, int aTimeout, char* aPostData,
+                                              const HttpHeader* aHeaders, uint8_t aHeadersNum,
+                                              uint8_t aReqId, char* aRxBuffer, uint16_t aRxBufferSize,
+                                              void* aUserData, uint16_t aRespOffset,
+                                              void (*aCallback)(SHttpClientRequest&));
+                                            
+    SHttpClientRequest& operator=(const SHttpClientRequest& other);
 };
 
 using HttpCallback = void(*)(SHttpClientRequest&);
@@ -74,5 +82,56 @@ inline SHttpClientRequest::SHttpClientRequest()
       respCode(0),
       callback(defaultHttpClientCallback)
 {}
+
+inline SHttpClientRequest::SHttpClientRequest(char* aHost, int aPort, char* aPath, Method aMethod,
+                                              bool aUseHttps, int aTimeout, char* aPostData,
+                                              const HttpHeader* aHeaders, uint8_t aHeadersNum,
+                                              uint8_t aReqId, char* aRxBuffer, uint16_t aRxBufferSize,
+                                              void* aUserData, uint16_t aRespOffset,
+                                              void (*aCallback)(SHttpClientRequest&))
+    : host(aHost),
+      port(aPort),
+      path(aPath),
+      method(aMethod),
+      useHttps(aUseHttps),
+      timeout(aTimeout),
+      postData(aPostData),
+      headers(aHeaders),
+      headersNum(aHeadersNum),
+      reqId(aReqId),
+      rxBuffer(aRxBuffer),
+      rxBufferSize(aRxBufferSize),
+      userData(aUserData),
+      respOffset(aRespOffset),
+      result(false),
+      respCode(0),
+      callback(aCallback)
+{}
+
+inline SHttpClientRequest& SHttpClientRequest::operator=(const SHttpClientRequest& other)
+{
+    if (this != &other)
+    {
+        host = other.host;
+        port = other.port;
+        path = other.path;
+        method = other.method;
+        useHttps = other.useHttps;
+        timeout = other.timeout;
+        postData = other.postData;
+        headers = other.headers;
+        headersNum = other.headersNum;
+        reqId = other.reqId;
+        rxBuffer = other.rxBuffer;
+        rxBufferSize = other.rxBufferSize;
+        userData = other.userData;
+        respOffset = other.respOffset;
+        result = other.result;
+        respCode = other.respCode;
+        callback = other.callback;
+    }
+    return *this;
+}
+
 
 #endif //__SHTTPSCLIENTREQUEST_H__

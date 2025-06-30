@@ -3,12 +3,15 @@
 
 #include "commonStd.h"
 
+#include "SHttpsClientRequest.h"
+
+
 class IHttpsClient
 {
 public:
-    IHttpsClient() = default;
-    ~IHttpsClient() = default;
+    virtual ~IHttpsClient() = default;
 
+    virtual bool sendRequest(SHttpClientRequest& request) = 0;
 };
 
 #endif //__IHTTPSCLIENT_H__

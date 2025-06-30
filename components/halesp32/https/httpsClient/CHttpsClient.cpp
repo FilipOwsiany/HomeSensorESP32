@@ -44,27 +44,34 @@ void CHttpsClient::httpsStatusHandler(SHttpClientRequest& request)
 	case 200:
 	case 201:
 	case 204:
+		errMsg = "OK";
 		request.result = true;
+		CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Success, "http request of type %d returned %s code: %d, result %d\n", request.reqId, errMsg, request.respCode, request.result);
 		return;
 	case 401:
 	case 404:
+        request.result = false;	
 		errMsg = "CLIENT ERROR";
+		CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "http request of type %d returned %s code: %d, result %d", request.reqId, errMsg, request.respCode, request.result);
 		break;
 	case 500:
+	    request.result = false;
 		errMsg = "SERVER ERROR";
+		CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "http request of type %d returned %s code: %d, result %d", request.reqId, errMsg, request.respCode, request.result);
 		break;
 	default:
+	    request.result = false;
 		errMsg = "unhandled error";
+    	CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "http request of type %d returned %s code: %d, result %d", request.reqId, errMsg, request.respCode, request.result);
 		break;
 	}
-    CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "http request of type %d returned %s code: %d\n", request.reqId, errMsg, request.respCode);
 }
 
 esp_err_t CHttpsClient::httpsEventHandler(esp_http_client_event_t *event)
 {
     CHttpsClient *self = static_cast<CHttpsClient *>(event->user_data);
 
-    CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "httpsEventHandler: %d\n", event->event_id);
+    CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "httpsEventHandler: %d", event->event_id);
 
 	switch (event->event_id)
 	{
@@ -82,6 +89,8 @@ esp_err_t CHttpsClient::httpsEventHandler(esp_http_client_event_t *event)
 			{
 				memcpy(self->mRequest.rxBuffer + self->mRequest.respOffset, event->data, event->data_len);
 				self->mRequest.respOffset += event->data_len;
+				CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "Received %d bytes of data", event->data_len);
+				CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "Current response buffer: %.*s", self->mRequest.respOffset, self->mRequest.rxBuffer);
 			}
 			else
 			{
@@ -90,6 +99,7 @@ esp_err_t CHttpsClient::httpsEventHandler(esp_http_client_event_t *event)
 		}
 		break;
 	case HTTP_EVENT_ON_FINISH:
+		CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "HTTP_EVENT_ON_FINISH");
 		// TODO if !use_https AES decode
 		self->mRequest.respCode = esp_http_client_get_status_code(event->client);
 		self->httpsStatusHandler(self->mRequest);
@@ -105,7 +115,7 @@ esp_err_t CHttpsClient::httpsEventHandler(esp_http_client_event_t *event)
 	case HTTP_EVENT_REDIRECT:
 		break;
 	default:
-        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "Unknown event id: %d\n", event->event_id);
+        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "Unknown event id: %d", event->event_id);
 		break;
 	}
 	return ESP_OK;
@@ -152,6 +162,8 @@ bool CHttpsClient::sendRequest(SHttpClientRequest& request)
         {
             CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Error, "Post data is NULL");
             esp_http_client_cleanup(client);
+
+			request = mRequest;
 			return false;
         }
 		// TODO if !useHttps AES encode
@@ -161,19 +173,20 @@ bool CHttpsClient::sendRequest(SHttpClientRequest& request)
     esp_err_t err = esp_http_client_perform(client);
 	if (err == ESP_OK)
 	{
-        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "HTTPS Status = %d, content_length = %lld\n",
-            esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
+		CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "HTTPS Status = %d, content_length = %lld",
+			esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
 	}
 	else if (err == ESP_ERR_HTTP_EAGAIN)
 	{
-        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "Cloud request send timeout\n");
+        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "Cloud request send timeout");
 	}
 	else
 	{
-        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "Error perform http request %s\n", esp_err_to_name(err));
+        CLogger::log(CLoggerModule::HttpsClient, CLoggerLevel::Debug, "Error perform http request %s", esp_err_to_name(err));
 	}
 
 	esp_http_client_cleanup(client);
 
+	request = mRequest;
     return true;
 }
