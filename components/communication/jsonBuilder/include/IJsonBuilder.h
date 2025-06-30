@@ -8,10 +8,8 @@ class IJsonBuilder
 {
 public:
 
-    virtual ~IJsonBuilder() = 0;
+    virtual ~IJsonBuilder() = default;
     virtual bool jsonBuild(void *input, cJSON *payloadObj) = 0;
 };
-
-IJsonBuilder::~IJsonBuilder() {}
 
 #endif //__IJSONBUILDER_H__

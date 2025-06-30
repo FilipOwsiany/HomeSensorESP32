@@ -1,67 +1,82 @@
 #include "CJsonBuilder.h"
-
 #include "CLogger.h"
+#include "CMeasurmentsBuilder.h"
+#include "CSettingsBuilder.h"
 
-CJsonBuilder::CJsonBuilder(/* args */)
+CJsonBuilder::CJsonBuilder()
 {
     registerBuilder(EJsonBuilderType::Measurement, new CMeasurmentsBuilder());
-    registerBuilder(EJsonBuilderType::Setting, new SettingsBuilder());
+    registerBuilder(EJsonBuilderType::Setting, new CSettingsBuilder());
 }
 
 CJsonBuilder::~CJsonBuilder()
 {
+    for (int i = 0; i < static_cast<int>(EJsonBuilderType::Max); i++)
+    {
+        delete builders[i];
+        builders[i] = nullptr;
+    }
 }
 
-bool CJsonBuilder::buildHelper(void *input, cJSON *payloadObj, EJsonBuilderType type)
+void CJsonBuilder::registerBuilder(EJsonBuilderType type, IJsonBuilder* builder)
 {
-    printf("build_helper type %d\n", type);
-    IJsonBuilder* builder = builders[type];
-    if (builder) 
+    if (type < EJsonBuilderType::Max)
+    {
+        builders[static_cast<int>(type)] = builder;
+    }
+}
+
+bool CJsonBuilder::buildHelper(void* input, cJSON* payloadObj, EJsonBuilderType type)
+{
+    printf("CJsonBuilder::buildHelper(), type: %d\n", static_cast<int>(type));
+    IJsonBuilder* builder = builders[static_cast<int>(type)];
+    if (builder)
     {
         return builder->jsonBuild(input, payloadObj);
     }
     return false;
 }
 
-char* CJsonBuilder::buildMessage(void *input, EJsonBuilderType type)
+char* CJsonBuilder::buildMessage(void* input, EJsonBuilderType type)
 {
-    cJSON *message =    NULL;
-    cJSON *payload =    NULL;
-    char *json =        NULL;
-    
-    message = cJSON_CreateObject();
-    CLEAN_UP_MESSAGE_IF_0(message);
+    cJSON* message = cJSON_CreateObject();
+    if (!message) return nullptr;
 
-    RET_IF_0(cJSON_AddNumberToObject(message, "Id", (double)1.0), NULL);
-    CLEAN_UP_MESSAGE_IF_0(cJSON_AddStringToObject(message, "Name", "Sensor1"));
+    if (!cJSON_AddNumberToObject(message, "Id", 1.0))
+    {
+        cJSON_Delete(message);
+        return nullptr;
+    }
 
-    payload = cJSON_CreateObject();
-    CLEAN_UP_ALL_IF_0(payload);
-    CLEAN_UP_ALL_IF_0(buildHelper(input, payload, type));
-    CLEAN_UP_ALL_IF_0(cJSON_AddItemToObject(message, "SensorData", payload));
+    if (!cJSON_AddStringToObject(message, "Name", "Sensor1"))
+    {
+        cJSON_Delete(message);
+        return nullptr;
+    }
 
-    json = cJSON_PrintUnformatted(message);
+    cJSON* payload = cJSON_CreateObject();
+    if (!payload)
+    {
+        cJSON_Delete(message);
+        return nullptr;
+    }
+
+    if (!buildHelper(input, payload, type))
+    {
+        cJSON_Delete(payload);
+        cJSON_Delete(message);
+        return nullptr;
+    }
+
+    cJSON_AddItemToObject(message, "SensorData", payload);
+    char* json = cJSON_PrintUnformatted(message);
     cJSON_Delete(message);
     return json;
-clean_up_all:
-    cJSON_Delete(payload);
-clean_up_message:
-    cJSON_Delete(message);
-    return NULL;
 }
 
-void CJsonBuilder::registerBuilder(EJsonBuilderType type, Json_builderBase* builder)
+char* CJsonBuilder::buildJson(EJsonBuilderType type, void* input)
 {
-    if (type < EJsonBuilderType::Max)
-    {
-        builders[type] = builder;
-    }
-}
-
-std::string CJsonBuilder::BuildJson(const SMeassurment& measurement);
-{
-    
-    return  build_message(input, type);
+    return buildMessage(input, type);
 }
 
 CJsonBuilder& CJsonBuilder::getInstance()
