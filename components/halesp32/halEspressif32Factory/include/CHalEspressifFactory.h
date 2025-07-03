@@ -16,6 +16,6 @@ public:
     static IWifi& createWifi(void);
     static void destroyWifi(void);
 
-    static IHttpsClient& createHttpsClient(void);
-    static void destroyHttpsClient(void);
+    // static IHttpsClient& createHttpsClient(void);
+    // static void destroyHttpsClient(void);
 };

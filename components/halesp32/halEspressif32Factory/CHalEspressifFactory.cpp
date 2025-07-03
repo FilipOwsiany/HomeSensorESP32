@@ -45,12 +45,12 @@ void CHalEspressifFactory::destroyWifi(void)
    // No action needed for static instance
 }
 
-IHttpsClient& CHalEspressifFactory::createHttpsClient(void) 
-{
-    return static_cast<IHttpsClient&>(* new CHttpsClient);
-}
+// IHttpsClient& CHalEspressifFactory::createHttpsClient(void) 
+// {
+//     return static_cast<IHttpsClient&>(* new CHttpsClient);
+// }
 
-void CHalEspressifFactory::destroyHttpsClient(void) 
-{
-    // No action needed for static instance
-}
+// void CHalEspressifFactory::destroyHttpsClient(void) 
+// {
+//     // No action needed for static instance
+// }

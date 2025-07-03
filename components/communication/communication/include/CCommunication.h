@@ -8,15 +8,17 @@
 #include "CBaseTask.h"
 
 #include "IHttpsClient.h"
+#include "IHttpsClientCallback.h"
 
-class CCommunication : public IEventListener, public IEventPublisherManager, public CBaseTask
+class CCommunication : public IEventListener, public IEventPublisherManager, public CBaseTask, public IHttpsClientCallback
 {
 private:
-    IHttpsClient& mItsHttpsClient;
+    IHttpsClient* mItsHttpsClient;
     CLoggerHelper mLog;
 
     void parseEvent(SEvent& event);
     friend void processQueueEvent<CCommunication>(CCommunication& self, CLoggerModule loggerModule);
+    void responseCallback(SHttpClientRequest& event) override;
 public:
     CCommunication();
     ~CCommunication();
@@ -24,7 +26,6 @@ public:
     void sendEvent(SEvent& event, bool selfNotify) override;
     void onEvent(SEvent& event) override;
     static void taskFunction(void* pvParameter);
-    static void httpsResponseHandler(SHttpClientRequest& event);
 };
 
 #endif //__CCCOMUNICATION_H__

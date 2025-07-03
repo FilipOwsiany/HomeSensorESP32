@@ -2,12 +2,16 @@
 
 #include "CLogger.h"
 
-CHttpsClient::CHttpsClient(/* args */)
+CHttpsClient::CHttpsClient(IHttpsClientCallback& aCallback): 
+	mRequest(),
+	mCallback(aCallback)
 {
+
 }
 
 CHttpsClient::~CHttpsClient()
 {
+
 }
 
 bool CHttpsClient::validateRequest(SHttpClientRequest& request)
@@ -103,10 +107,7 @@ esp_err_t CHttpsClient::httpsEventHandler(esp_http_client_event_t *event)
 		// TODO if !use_https AES decode
 		self->mRequest.respCode = esp_http_client_get_status_code(event->client);
 		self->httpsStatusHandler(self->mRequest);
-		if (self->mRequest.callback)
-		{
-			self->mRequest.callback(self->mRequest);
-		}
+		self->mCallback.responseCallback(self->mRequest);
 		break;
 	case HTTP_EVENT_ERROR:
 	case HTTP_EVENT_HEADERS_SENT:

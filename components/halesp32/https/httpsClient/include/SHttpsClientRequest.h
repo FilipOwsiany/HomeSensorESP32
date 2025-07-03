@@ -43,30 +43,20 @@ struct SHttpClientRequest
     bool result;
     int respCode;
 
-    void (*callback)(SHttpClientRequest&);
-
     SHttpClientRequest();
     SHttpClientRequest(char* aHost, int aPort, char* aPath, Method aMethod,
                                               bool aUseHttps, int aTimeout, char* aPostData,
                                               const HttpHeader* aHeaders, uint8_t aHeadersNum,
                                               uint8_t aReqId, char* aRxBuffer, uint16_t aRxBufferSize,
-                                              void* aUserData, uint16_t aRespOffset,
-                                              void (*aCallback)(SHttpClientRequest&));
+                                              void* aUserData, uint16_t aRespOffset);
                                             
     SHttpClientRequest& operator=(const SHttpClientRequest& other);
 };
 
-using HttpCallback = void(*)(SHttpClientRequest&);
-
-inline void defaultHttpClientCallback(SHttpClientRequest& request) 
-{
-
-}
-
 inline SHttpClientRequest::SHttpClientRequest()
-    : host(const_cast<char*>("")),
+    : host(nullptr),
       port(80),
-      path(const_cast<char*>("")),
+      path(nullptr),
       method(Method::Get),
       useHttps(false),
       timeout(5000),
@@ -79,16 +69,14 @@ inline SHttpClientRequest::SHttpClientRequest()
       userData(nullptr),
       respOffset(0),
       result(false),
-      respCode(0),
-      callback(defaultHttpClientCallback)
+      respCode(static_cast<int>(Error::FailedToConnect))
 {}
 
 inline SHttpClientRequest::SHttpClientRequest(char* aHost, int aPort, char* aPath, Method aMethod,
                                               bool aUseHttps, int aTimeout, char* aPostData,
                                               const HttpHeader* aHeaders, uint8_t aHeadersNum,
                                               uint8_t aReqId, char* aRxBuffer, uint16_t aRxBufferSize,
-                                              void* aUserData, uint16_t aRespOffset,
-                                              void (*aCallback)(SHttpClientRequest&))
+                                              void* aUserData, uint16_t aRespOffset)
     : host(aHost),
       port(aPort),
       path(aPath),
@@ -104,8 +92,7 @@ inline SHttpClientRequest::SHttpClientRequest(char* aHost, int aPort, char* aPat
       userData(aUserData),
       respOffset(aRespOffset),
       result(false),
-      respCode(0),
-      callback(aCallback)
+      respCode(0)
 {}
 
 inline SHttpClientRequest& SHttpClientRequest::operator=(const SHttpClientRequest& other)
@@ -128,7 +115,6 @@ inline SHttpClientRequest& SHttpClientRequest::operator=(const SHttpClientReques
         respOffset = other.respOffset;
         result = other.result;
         respCode = other.respCode;
-        callback = other.callback;
     }
     return *this;
 }

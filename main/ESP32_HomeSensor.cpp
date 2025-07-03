@@ -190,7 +190,7 @@ extern "C" void app_main(void)
 
     ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(300 * 1000000));
 
-    vTaskDelay(8000 / portTICK_PERIOD_MS);
+    vTaskDelay(9000 / portTICK_PERIOD_MS);
 
     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Entering deep sleep mode");
     printf("Entering deep sleep mode\n");
