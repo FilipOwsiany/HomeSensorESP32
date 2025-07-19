@@ -23,9 +23,9 @@ void CLogger::log(CLoggerConfig::CLogModule module, CLoggerConfig::CLogLevel log
     switch (logLvl)
     {
         case CLoggerConfig::CLogLevel::Debug:                                           break;
-        case CLoggerConfig::CLogLevel::Info:                                            break;
+        case CLoggerConfig::CLogLevel::Info:            logString += "\033[0;36m";      break;
         case CLoggerConfig::CLogLevel::ImportantInfo:   logString += "\033[0;34m";      break;
-        case CLoggerConfig::CLogLevel::Success:         logString += "\033[0;36m";      break;
+        case CLoggerConfig::CLogLevel::Success:         logString += "\033[0;32m";      break;
         case CLoggerConfig::CLogLevel::Performance:                                     break;
         case CLoggerConfig::CLogLevel::Warning:         logString += "\033[0;33m";      break;
         case CLoggerConfig::CLogLevel::Error:           logString += "\033[4;31m";      break;
@@ -38,9 +38,9 @@ void CLogger::log(CLoggerConfig::CLogModule module, CLoggerConfig::CLogLevel log
     switch (logLvl)
     {
         case CLoggerConfig::CLogLevel::Debug:           logString += "[DEBUG] ";                break;
-        case CLoggerConfig::CLogLevel::Info:            logString += "[INFO] ";                 break;
+        case CLoggerConfig::CLogLevel::Info:            logString += "\033[0;36m[INFO] ";       break;
         case CLoggerConfig::CLogLevel::ImportantInfo:   logString += "\033[0;34m[IMPORTANT] ";  break;
-        case CLoggerConfig::CLogLevel::Success:         logString += "\033[0;36m[SUCCESS] ";    break;
+        case CLoggerConfig::CLogLevel::Success:         logString += "\033[0;32m[SUCCESS] ";    break;
         case CLoggerConfig::CLogLevel::Performance:     logString += "[PERFORMANCE] ";          break;
         case CLoggerConfig::CLogLevel::Warning:         logString += "\033[0;33m[WARNING] ";    break;
         case CLoggerConfig::CLogLevel::Error:           logString += "\033[4;31m[ERROR] ";      break;
