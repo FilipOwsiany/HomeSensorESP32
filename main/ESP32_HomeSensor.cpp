@@ -21,6 +21,9 @@
 #include "CHardware.h"
 
 #include "CBme280.h"
+#include "CAdc.h"
+#include "CStorage.h"
+#include "CLowPower.h"
 
 #define LV_TICK_PERIOD_MS   1
 #define DRAW_BUF_SIZE       (240 * 240 / 10 * (LV_COLOR_DEPTH / 8))
@@ -128,12 +131,14 @@ extern "C" void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    esp_pm_config_t pm_config = {
-        .max_freq_mhz = 160,
-        .min_freq_mhz = 40,
-        .light_sleep_enable = false
-    };
-    ESP_ERROR_CHECK(esp_pm_configure(&pm_config));
+    CLowPower::getInstance().configureLowPowerMode(160, 40, false);
+
+    // esp_pm_config_t pm_config = {
+    //     .max_freq_mhz = 160,
+    //     .min_freq_mhz = 40,
+    //     .light_sleep_enable = false
+    // };
+    // ESP_ERROR_CHECK(esp_pm_configure(&pm_config));
 
 
     gpio_set_direction(GPIO_NUM_33, GPIO_MODE_OUTPUT);
@@ -149,21 +154,32 @@ extern "C" void app_main(void)
     // gpio_set_level(GPIO_NUM_32, 0);
     // gpio_set_level(GPIO_NUM_33, 1);
 
-    CBme280 *bme280 = new CBme280(CBme280::Bmx280Mode::FORCE,
-                          CBme280::Bmx280TemperatureOversampling::X16,
-                          CBme280::Bmx280PressureOversampling::X4,
-                          CBme280::Bme280HumidityOversampling::X4,
-                          CBme280::Bmx280StandbyTime::STANDBY_20M,
-                          CBme280::Bmx280IirFilter::X16);
-   
-    CControl *control = new CControl();
+    CBme280 *bme280 = new CBme280(
+                        CBme280::Bmx280Mode::FORCE,
+                        CBme280::Bmx280TemperatureOversampling::X16,
+                        CBme280::Bmx280PressureOversampling::X4,
+                        CBme280::Bme280HumidityOversampling::X4,
+                        CBme280::Bmx280StandbyTime::STANDBY_20M,
+                        CBme280::Bmx280IirFilter::X16);
+
+    CAdc *adc = new CAdc(    
+                        CAdc::EAdcUnit::UNIT_1, 
+                        CAdc::EAdcChannel::CHANNEL_6);
+
+    CStorage *storage = new CStorage();
+
+    CLowPower* lowPower = &CLowPower::getInstance();
+
+    CControl *control = new CControl(*lowPower);
     CCommunication *communication = new CCommunication();
-    CHardware *hardware = new CHardware(*bme280);
+    CHardware *hardware = new CHardware(*bme280, *adc, *storage);
+
 
     control->subscribe(communication);
     control->subscribe(hardware);
 
     hardware->subscribe(control);
+    communication->subscribe(control);
 
     SEvent eventApplicationStart(CommonEventId::ApplicationStart);
     control->sendEvent(eventApplicationStart, true);
@@ -188,14 +204,27 @@ extern "C" void app_main(void)
     // SBme280 bme280Data;
     // bme280->read(bme280Data);
 
-    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(300 * 1000000));
+    // ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(300 * 1000000));
 
-    vTaskDelay(9000 / portTICK_PERIOD_MS);
+    // gpio_set_direction(GPIO_NUM_12, GPIO_MODE_INPUT);
+    // gpio_set_pull_mode(GPIO_NUM_12, GPIO_PULLUP_ONLY);
 
-    CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Entering deep sleep mode");
-    printf("Entering deep sleep mode\n");
+    // while (true)
+    // {
+    //     int level = gpio_get_level(GPIO_NUM_12);
+    //     CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "GPIO PIN %d = %d", GPIO_NUM_12, level);
+    //     vTaskDelay(200);
+    // }
+    
 
-    esp_deep_sleep_start();
+    vTaskDelay(portMAX_DELAY);
+
+    CLogger::log(CLoggerModule::Main, CLoggerLevel::CriticalFailure, "Unexpected exit from app_main");
+
+    // CLogger::log(CLoggerModule::Main, CLoggerLevel::Success, "Entering deep sleep mode");
+    // printf("Entering deep sleep mode\n");
+
+    // esp_deep_sleep_start();
 }
 
 

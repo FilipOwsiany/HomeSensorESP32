@@ -11,6 +11,7 @@
 #include "SBme280.h"
 
 #include "IWifi.h"
+#include "CLowPower.h"
 
 class CControl : public IEventListener, public IEventPublisherManager, public CBaseTask
 {
@@ -18,13 +19,15 @@ private:
 
     std::vector<IEventListener*> listeners;
     IWifi& mItsWifi;
+    CLowPower& mItsLowPower;
+
     CLoggerHelper mLog;
     SMeassurment mMeasurement;
 
     void parseEvent(SEvent& event);
     friend void processQueueEvent<CControl>(CControl& self, CLoggerModule loggerModule);
 public:
-    CControl();
+    CControl(CLowPower& aItsLowPower);
     ~CControl();
 
     void sendEvent(SEvent& event, bool selfNotify) override;
