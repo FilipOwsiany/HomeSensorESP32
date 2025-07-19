@@ -28,6 +28,73 @@ struct SMeassurment
     }
 };
 
+struct SMeassurmentMultiple
+{
+    float mTemperature[10];
+    float mHumidity[10];
+    float mPressure[10];
+    float mVoltage[10];
+
+    SMeassurmentMultiple()
+    {
+        for (int i = 0; i < 10; ++i)
+        {
+            mTemperature[i] = 0.0f;
+            mHumidity[i] = 0.0f;
+            mPressure[i] = 0.0f;
+            mVoltage[i] = 0.0f;
+        }
+    }
+
+    SMeassurmentMultiple(const float temperature[10], const float humidity[10], const float pressure[10], const float voltage[10])
+    {
+        for (int i = 0; i < 10; ++i)
+        {
+            mTemperature[i] = temperature[i];
+            mHumidity[i] = humidity[i];
+            mPressure[i] = pressure[i];
+            mVoltage[i] = voltage[i];
+        }
+    }
+
+    SMeassurmentMultiple(const SMeassurmentMultiple& other)
+    {
+        for (int i = 0; i < 10; ++i)
+        {
+            mTemperature[i] = other.mTemperature[i];
+            mHumidity[i] = other.mHumidity[i];
+            mPressure[i] = other.mPressure[i];
+            mVoltage[i] = other.mVoltage[i];
+        }
+    }
+
+    SMeassurmentMultiple(const SMeassurment (&measurements)[10])
+    {
+        for (int i = 0; i < 10; ++i)
+        {
+            mTemperature[i] = measurements[i].mTemperature;
+            mHumidity[i]    = measurements[i].mHumidity;
+            mPressure[i]    = measurements[i].mPressure;
+            mVoltage[i]     = measurements[i].mVoltage;
+        }
+    }
+
+    SMeassurmentMultiple& operator=(const SMeassurmentMultiple& other)
+    {
+        if (this != &other)
+        {
+            for (int i = 0; i < 10; ++i)
+            {
+                mTemperature[i] = other.mTemperature[i];
+                mHumidity[i] = other.mHumidity[i];
+                mPressure[i] = other.mPressure[i];
+                mVoltage[i] = other.mVoltage[i];
+            }
+        }
+        return *this;
+    }
+};
+
 struct SSettings
 {
     uint32_t mWakeupTimeout;

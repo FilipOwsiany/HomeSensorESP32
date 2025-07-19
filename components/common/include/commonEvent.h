@@ -7,6 +7,11 @@ enum class CommonEventId : uint32_t
 {
     None = 0,
     ApplicationStart = 1,
+    ReadMeasRequest,
+    ReadMeasACK,
+    SendMeasRequest,
+    SendMeasACK,
+
     ReadAdcRequest,
     ReadAdcACK,
     SendAdcRequest,
@@ -16,6 +21,9 @@ enum class CommonEventId : uint32_t
     SendBme280Request,
     SendBme280ACK,
     SendDataToServer, 
+    dummy,
+    SendDataToServerMultiple,
+    ApplicationStop,
 };
 
 #endif //__COMMONEVENT_H__
