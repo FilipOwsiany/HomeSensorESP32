@@ -1,6 +1,8 @@
 idf_component_register(
-    SRCS "CHardware.cpp"
-    INCLUDE_DIRS "include"
+    SRCS         "hardware/CHardware.cpp"
+                 "measQueue/CMeasQueue.cpp"
+    INCLUDE_DIRS "hardware/include"
+                 "measQueue/include"
     REQUIRES
     # ===== IDF =====
 
