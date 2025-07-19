@@ -12,6 +12,7 @@ public:
     enum class EJsonBuilderType
     {
         Measurement,
+        MeasurementMultiple,
         Setting,
         Max
     };

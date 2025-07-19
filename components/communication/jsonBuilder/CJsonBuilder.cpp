@@ -1,11 +1,13 @@
 #include "CJsonBuilder.h"
 #include "CLogger.h"
-#include "CMeasurmentsBuilder.h"
+#include "CMeasurementsBuilder.h"
+#include "CMeasurementsMultipleBuilder.h"
 #include "CSettingsBuilder.h"
 
 CJsonBuilder::CJsonBuilder()
 {
-    registerBuilder(EJsonBuilderType::Measurement, new CMeasurmentsBuilder());
+    registerBuilder(EJsonBuilderType::Measurement, new CMeasurementsBuilder());
+    registerBuilder(EJsonBuilderType::MeasurementMultiple, new CMeasurementsMultipleBuilder());
     registerBuilder(EJsonBuilderType::Setting, new CSettingsBuilder());
 }
 
@@ -28,7 +30,6 @@ void CJsonBuilder::registerBuilder(EJsonBuilderType type, IJsonBuilder* builder)
 
 bool CJsonBuilder::buildHelper(void* input, cJSON* payloadObj, EJsonBuilderType type)
 {
-    printf("CJsonBuilder::buildHelper(), type: %d\n", static_cast<int>(type));
     IJsonBuilder* builder = builders[static_cast<int>(type)];
     if (builder)
     {

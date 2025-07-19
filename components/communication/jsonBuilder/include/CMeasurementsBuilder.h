@@ -5,16 +5,15 @@
 #include "commonData.h"
 #include "cJSON.h"
 
-class CMeasurmentsBuilder : public IJsonBuilder
+class CMeasurementsBuilder : public IJsonBuilder
 {
 public:
-    CMeasurmentsBuilder() = default;
-    ~CMeasurmentsBuilder() = default;
+    CMeasurementsBuilder() = default;
+    ~CMeasurementsBuilder() = default;
 
     bool jsonBuild(void* input, cJSON* payloadObj) override
     {
         SMeassurment& measurement = *static_cast<SMeassurment*>(input);
-        printf("CMeasurmentsBuilder::jsonBuild()\n");
 
         if (!cJSON_AddNumberToObject(payloadObj, "Value", measurement.mTemperature)) return false;
         if (!cJSON_AddNumberToObject(payloadObj, "Value2", measurement.mPressure)) return false;
