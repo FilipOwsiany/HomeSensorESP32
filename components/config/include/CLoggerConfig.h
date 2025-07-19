@@ -39,6 +39,7 @@ public:
         HttpsClient,
         Adc,
         Bme280,
+        MeasQueue,
 
         All,
 
