@@ -15,6 +15,7 @@ CLowPower& CLowPower::getInstance()
 void CLowPower::enterDeepSleep(uint64_t aSleepTimeUs)
 {
     esp_sleep_enable_timer_wakeup(aSleepTimeUs);
+    printf("Entering deep sleep for %llu microseconds\n", aSleepTimeUs);
     esp_deep_sleep_start();
 }
 
@@ -28,6 +29,8 @@ void CLowPower::configureLowPowerMode(uint8_t aMaxClockFrequency,
         .light_sleep_enable = aEnableLightSleep
     };
 
+    printf("Configuring low power mode: max_freq_mhz=%d, min_freq_mhz=%d, light_sleep_enable=%d\n",
+           aMaxClockFrequency, aMinClockFrequency, aEnableLightSleep);
     esp_err_t ret = esp_pm_configure(&poweManagmentConfig);
 }
 

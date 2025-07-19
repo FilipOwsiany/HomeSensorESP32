@@ -1,3 +1,6 @@
+#ifndef __CLOWPOWER_H__
+#define __CLOWPOWER_H__
+
 #include "commonStd.h"
 
 class CLowPower
@@ -16,3 +19,4 @@ public:
                                bool aEnableLightSleep = true);
 };
 
+#endif //__CLOWPOWER_H__
