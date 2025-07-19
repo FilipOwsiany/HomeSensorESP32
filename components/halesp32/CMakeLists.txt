@@ -1,5 +1,6 @@
 idf_component_register( 
     SRCS                "adc/CAdc.cpp"
+                        "storage/CStorage.cpp"
                         "wifi/CWifi.cpp"
                         "bme280/bmx280.c"
                         "bme280/bme280.c"
@@ -11,6 +12,7 @@ idf_component_register(
      
     INCLUDE_DIRS        "adc/include"    
                         "bme280/include"
+                        "storage/include"
                         "wifi/include"
                         "halEspressif32Factory/include"
                         "https/httpsClient/include"
@@ -22,6 +24,7 @@ idf_component_register(
     esp_wifi
     esp_http_client
     wpa_supplicant
+    nvs_flash
     driver
     # === CUSTOM ====
     config
